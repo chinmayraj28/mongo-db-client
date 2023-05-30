@@ -2,9 +2,6 @@
 
 View Databases, Collections and Data stored.
 
-![home]('./images/home.png')
-
-
 ## Run Locally
 
 Clone the project
@@ -32,6 +29,13 @@ Start the server
 ```
 
 This will turn the server on. Running on local host port 3000. You can also change this in the source code.
+
+## Demo Images
+
+![Loading](./images/loading.png)
+![Home](./images/home.png)
+![Collections](./images/collection.png)
+![Data](./images/data.png)
 
 
 

@@ -1,0 +1,40 @@
+<%- include('../common/head')%>
+<body>
+    <header>
+        <%- include('../common/header', {db: allDbs})%>
+    </header>
+    <main>
+        <div class="container">
+            <h2><%=dbName%></h2>
+            <ul class="list-group">
+                <% allCollections[dbNameStr].forEach(function(d){ %>
+                    <button type="button" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#staticBackdrop_<%=d%>"><%=d%></button>
+                <% }) %>
+            </ul>
+            <% allDataInCollection[dbNameStr].forEach(function(d){ %>
+                <div class="modal fade" id="staticBackdrop_<%=d.collection%>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-fullscreen">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel_<%d.collection%>"><%=d.collection%></h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <% d.data.forEach((data) => { %>
+                                    <p><%= JSON.stringify(data) %></p>
+                            <% }) %>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            <% }) %>    
+    </main>
+    <footer>
+        <%- include('../common/footer')%>
+    </footer>
+</body>
+</html>

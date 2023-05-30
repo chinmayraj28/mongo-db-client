@@ -1,0 +1,21 @@
+<%- include('../common/head')%>
+<body>
+    <header>
+        <%- include('../common/header', {db: allDbs})%>
+    </header>
+    <main>
+        <div class="container">
+            <h2 style="padding-bottom: 10px;" >Mongo Database</h2>
+            <h5>Your Databases:</h5>
+            <ul class="list-group">
+                <% allDbs.forEach(function(d) { %>
+                    <a style="color: red;" href="/<%=`${d}`%>" class="list-group-item list-group-item-action"><%=d%></a>
+                <% }); %>
+            </ul>
+        </div>
+    </main>
+    <footer>
+        <%- include('../common/footer')%>
+    </footer>
+</body>
+</html>

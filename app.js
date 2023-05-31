@@ -3,8 +3,8 @@ const mongoose = require('mongoose')
 const express = require('express');
 const app = express();
 const route = express.Router();
-const port = 3000
-let readyCheck = 0
+const port = 80
+let readyCheck = false
 
 //Your Mongo URL
 const { mongoUrl } = require('./config.json')
@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     if(!mongoUrl){
         res.send("Fill in the mongodb url in config.json file. After filling it in, restart the app in the console.")
     }else{
-        if (readyCheck === 1) {
+        if (readyCheck === true) {
             next();
           } else {
             res.render('common/loading');
@@ -43,44 +43,48 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
             updatedDb.push(d)
         })
 
-        //Get All Collections
-        result.databases.forEach(async (database) => {
-            const dbName = database.name;
-            if (dbName === 'local' || dbName === 'admin' || dbName === 'test') return;
-            try {
-                const db = mongoose.connection.client.db(dbName);
-                const collections = await db.listCollections().toArray();
-                collectionsByDatabase[dbName] = collections.map((collection) => collection.name);
-            } catch (error) {
-                console.error(`Error retrieving collections for database '${dbName}':`, error);
-            }
-        });
-
-        await delay(3000);
-        //Get Data From All The Collections
-        const collectionDataByDatabase = {};
-
-        Object.keys(collectionsByDatabase).forEach(async (dbName) => {
-            const collections = collectionsByDatabase[dbName];
-            collectionDataByDatabase[dbName] = [];
-            collections.forEach(async (collectionName) => {
-                try {
-                    const db = mongoose.connection.client.db(dbName);
-                    const collectionData = await db.collection(collectionName).find().toArray(); 
-                    collectionDataByDatabase[dbName].push({
-                        collection: collectionName,
-                        data: collectionData,
-                    });
-                } catch (error) {
-                    console.error(`Error retrieving data from collection '${collectionName}' in database '${dbName}':`, error);
-                }
-            });
-        });
-
         //Creating Paths
         updatedDb.forEach(async function(d){
             paths.push({path: `/${d}`, handler: async (req, res) => {
             //Handler Code
+
+            await delay(2000)
+            //Get All Collections
+            result.databases.forEach(async (database) => {
+                const dbName = database.name;
+                if (d === "local" || dbName === 'admin' || dbName === 'test') return;
+                    try {
+                        const db = mongoose.connection.client.db(dbName);
+                        const collections = await db.listCollections().toArray();
+                        collectionsByDatabase[dbName] = collections.map((collection) => collection.name);
+                    } catch (error) {
+                    console.error(`Error retrieving collections for database '${dbName}':`, error);
+                }
+            });
+
+            await delay(2000)
+
+            //Get Data From All The Collections
+            const collectionDataByDatabase = {};
+
+            Object.keys(collectionsByDatabase).forEach(async (dbName) => {
+                const collections = collectionsByDatabase[dbName];
+                collectionDataByDatabase[dbName] = [];
+                collections.forEach(async (collectionName) => {
+                    try {
+                        const db = mongoose.connection.client.db(dbName);
+                        const collectionData = await db.collection(collectionName).find().toArray(); 
+                        collectionDataByDatabase[dbName].push({
+                            collection: collectionName,
+                            data: collectionData,
+                        });
+                    } catch (error) {
+                        console.error(`Error retrieving data from collection '${collectionName}' in database '${dbName}':`, error);
+                    }
+                });
+            });
+
+            await delay(2000)
             res.render(`pages/renderEachPage`, {allDbs: updatedDb, dbName: d, dbNameStr: d.toString(), allCollections: collectionsByDatabase, allDataInCollection: collectionDataByDatabase})
         }})
 
@@ -94,7 +98,7 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
             app.get(route.path, route.handler);
         });
         await delay(1000)
-        readyCheck = 1
+        readyCheck = true
     })
     })
     .catch((error) => {
